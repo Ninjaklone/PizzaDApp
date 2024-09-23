@@ -5,15 +5,24 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
+import androidx.compose.material3.TextFieldDefaults.textFieldColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pizzadapp.ui.theme.PizzaDAppTheme
@@ -113,7 +122,7 @@ fun FrontPage(onCustomPizzaClick: () -> Unit, onPreMadePizzaClick: () -> Unit) {
                 "Welcome to Pizza Ordering App",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = Color.Black,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -150,13 +159,9 @@ fun CustomPizzaScreen(
     var selectedSize by remember { mutableStateOf("") }
     var selectedToppings by remember { mutableStateOf(setOf<String>()) }
 
-
-    Column(modifier = Modifier.padding(16.dp)) {
-
-            // Added Go Back button
-            Button(onClick = onGoback) {
-                Text("<")
-            }
+    Column(modifier = Modifier
+        .padding(16.dp)
+        .fillMaxSize()) {
 
         // Customer name input
         OutlinedTextField(
@@ -243,7 +248,15 @@ fun CustomPizzaScreen(
             Text("Complete Order")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Go Back button
+        Button(
+            onClick = onGoback,
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Text("< Go Back")
+        }
     }
 }
 
@@ -252,7 +265,8 @@ fun PreMadePizzaScreen(
     order: Order,
     onOrderUpdate: (Order) -> Unit,
     onCompleteOrder: () -> Unit,
-    onGoback: () -> Unit
+    onGoback: () -> Unit,
+    backgroundColor: Color = Color.White
 ) {
     var customerName by remember { mutableStateOf(order.customerName) }
 
@@ -263,80 +277,107 @@ fun PreMadePizzaScreen(
         Pizza("Vegetarian", "Medium", listOf("Cheese", "Mushrooms", "Onions", "Olives"), 10.99, R.drawable.vegetarian)
     )
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Button(onClick = onGoback) {
-            Text(text = "<")
-            
-        }
-        // Customer name input
-        OutlinedTextField(
-            value = customerName,
-            onValueChange = {
-                customerName = it
-                onOrderUpdate(order.copy(customerName = it))
-            },
-            label = { Text("Customer Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+            .border(2.dp, Color.LightGray, RectangleShape) // Light gray border
+            .background(Color(0xFFF0F0F0)) // Light gray background
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            Spacer(modifier = Modifier.height(16.dp)) // Space at the top
 
-        Spacer(modifier = Modifier.height(16.dp))
+            // Customer name input
+            OutlinedTextField(
+                value = customerName,
+                onValueChange = {
+                    customerName = it
+                    onOrderUpdate(order.copy(customerName = it))
+                },
+                label = { Text("Customer Name") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(Color.White)
+            )
 
-        // Display pre-made pizzas
-        Text("Pre-made Pizzas", fontWeight = FontWeight.Bold)
-        LazyColumn {
-            items(preMadePizzas) { pizza ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Row(modifier = Modifier.padding(8.dp)) {
-                        // Pizza image
-                        pizza.imageResId?.let { resId ->
-                            Image(
-                                painter = painterResource(id = resId),
-                                contentDescription = pizza.name,
-                                modifier = Modifier.size(80.dp)
-                            )
-                        }
-                        // Pizza details
-                        Column(modifier = Modifier.padding(start = 8.dp)) {
-                            Text(pizza.name, fontWeight = FontWeight.Bold)
-                            Text("Toppings: ${pizza.toppings.joinToString(", ")}")
-                            Text("Price: $${String.format("%.2f", pizza.price)}")
-                            Button(
-                                onClick = {
-                                    onOrderUpdate(order.copy(pizzas = (order.pizzas + pizza).toMutableList()))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display pre-made pizzas
+            Text("Pre-made Pizzas", fontWeight = FontWeight.Bold, color = Color.DarkGray)
+            LazyColumn {
+                items(preMadePizzas) { pizza ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                            colors = CardDefaults.cardColors(Color.White) // White card background
+                    ) {
+                        Row(modifier = Modifier.padding(8.dp)) {
+                            // Pizza image
+                            pizza.imageResId?.let { resId ->
+                                Image(
+                                    painter = painterResource(id = resId),
+                                    contentDescription = pizza.name,
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .clip(CircleShape) // Circular frame
+                                )
+                            }
+                            // Pizza details
+                            Column(modifier = Modifier.padding(start = 8.dp)) {
+                                Text(pizza.name, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                                Text("Toppings: ${pizza.toppings.joinToString(", ")}", color = Color.Gray)
+                                Text("Price: $${String.format("%.2f", pizza.price)}", color = Color.Gray)
+                                Button(
+                                    onClick = {
+                                        onOrderUpdate(order.copy(pizzas = (order.pizzas + pizza).toMutableList()))
+                                    },
+                                    colors = ButtonDefaults.buttonColors(Color.LightGray)
+                                ) {
+                                    Text("Add to Order", color = Color.DarkGray)
                                 }
-                            ) {
-                                Text("Add to Order")
                             }
                         }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Display current order
-        Text("Current Order:", fontWeight = FontWeight.Bold)
-        LazyColumn {
-            items(order.pizzas) { pizza ->
-                Text("${pizza.size} ${pizza.name} Pizza: $${String.format("%.2f", pizza.price)}")
+            // Display current order
+            Text("Current Order:", fontWeight = FontWeight.Bold, color = Color.DarkGray)
+            LazyColumn {
+                items(order.pizzas) { pizza ->
+                    Text("${pizza.size} ${pizza.name} Pizza: $${String.format("%.2f", pizza.price)}", color = Color.Gray)
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Complete order button
-        Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = onCompleteOrder,
-            modifier = Modifier.align(Alignment.End),
-            enabled = order.pizzas.isNotEmpty() && order.customerName.isNotBlank()
-        ) {
-            Text("Complete Order")
+            // Complete order button
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                onClick = onCompleteOrder,
+                modifier = Modifier.align(Alignment.End),
+                enabled = order.pizzas.isNotEmpty() && order.customerName.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(Color.LightGray)
+            ) {
+                Text("Complete Order", color = Color.DarkGray)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Go Back button
+            Button(
+                onClick = onGoback,
+                modifier = Modifier.align(Alignment.Start),
+                colors = ButtonDefaults.buttonColors(Color.LightGray)
+            ) {
+                Text("< Go Back", color = Color.DarkGray)
+            }
         }
     }
 }
