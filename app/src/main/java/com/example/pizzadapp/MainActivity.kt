@@ -91,22 +91,49 @@ fun PizzaOrderApp(modifier: Modifier = Modifier) {
 
 @Composable
 fun FrontPage(onCustomPizzaClick: () -> Unit, onPreMadePizzaClick: () -> Unit) {
-    // Front page layout with two main options
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Welcome to Pizza Ordering App", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(onClick = onCustomPizzaClick) {
-            Text("Create Custom Pizza")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onPreMadePizzaClick) {
-            Text("Choose Pre-made Pizza")
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Display pizza image covering the entire screen
+        Image(
+            painter = painterResource(id = R.drawable.pizza_cover),
+            contentDescription = "Pizza Cover",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        
+        // Overlay with buttons and text
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                "Welcome to Pizza Ordering App",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            Button(
+                onClick = onCustomPizzaClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text("Create Custom Pizza")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onPreMadePizzaClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text("Choose Pre-made Pizza")
+            }
         }
     }
 }
